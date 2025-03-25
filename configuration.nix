@@ -13,7 +13,6 @@
 
     nix.settings.experimental-features = [ "flakes" "nix-command" ];
 
-
     # Bootloader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -32,6 +31,15 @@
 		#	extraInputRules = '' '';
 
 		#};
+	  firewall = {
+		enable = true;
+
+		allowedTCPPorts = [ 5900  5901  5902 6969];
+		extraInputRules = ''
+        # allow from docker nets to host
+		ip saddr 172.0.0.0/8 accept
+		'';
+	  };
 	};
 
 	programs.nix-ld.enable = true;
@@ -59,14 +67,25 @@
   i18n.defaultLocale = "en_ZA.UTF-8";
 
 # Enable the X11 windowing system.
-  services.xserver.enable = true;
+	services.xserver.enable = true;
 
 # Enable the GNOME Desktop Environment.
+	# use lightdm for x11vncserver
+	# still need to check if lightdm is 100% needed
+	services.xserver.displayManager.lightdm.enable = true;
+#        services.xserver.displayManager.gdm.enable = true;
+	services.xserver.desktopManager.gnome.enable = true;
+	services.xserver.displayManager.gdm.wayland = false;
 
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.displayManager.gdm.wayland = false;
-  
+
+  # Disable the GNOME3/GDM auto-suspend feature that cannot be disabled in GUI!
+  # If no user is logged in, the machine will power down after 20 minutes.
+
+	systemd.targets.sleep.enable = false;
+	systemd.targets.suspend.enable = false;
+	systemd.targets.hibernate.enable = false;
+	systemd.targets.hybrid-sleep.enable = false;
+
 # compositor
     services.picom.enable = false;
 
@@ -77,8 +96,8 @@
 
 # Configure keymap in X11
     services.xserver = {
-    xkb.layout = "us";
-    xkb.variant = "";
+	xkb.layout = "us";
+	xkb.variant = "";
     };
 
     fonts.fontconfig.antialias = true;
@@ -188,7 +207,6 @@
     nixpkgs.config.nvidia.acceptLicense = true;
 
 
-
 # List packages installed in system profile. To search, run:
 # $ nix search wget
 
@@ -221,7 +239,6 @@
         jetbrains.gateway
         jetbrains.clion
         jetbrains-toolbox
-        x11vnc
         OVMFFull
 	clockify
 	nodejs_22
@@ -232,7 +249,15 @@
 	yarn
 	cider
 	torrential
-	
+	vscode
+	ardour
+	busybox
+	gnome-remote-desktop
+	xorg.xinit
+	ruby
+	jq
+	# VNC server
+	x11vnc
 	#lastapp
 		
 
@@ -271,7 +296,12 @@
 		settings.PasswordAuthentication = false;
 	};
 	
-  system.stateVersion = "24.05"; # Did you read the comment?
+	#services.mysql = {
+	#	enable = true;
+	#	package = pkgs.mariadb;
+	#};
+	
+  	system.stateVersion = "24.11"; # Did you read the comment?
 
 
 }
