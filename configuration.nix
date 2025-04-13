@@ -256,9 +256,18 @@
 	xorg.xinit
 	ruby
 	jq
+	gpu-viewer
+	inspector
+	code-cursor
+
 	# VNC server
 	x11vnc
+	
+	#AI tools
+	lmstudio
+
 	#lastapp
+	
 		
 
 #WINE
