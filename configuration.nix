@@ -141,7 +141,6 @@
         description = "Carl";
         extraGroups = [ "networkmanager" "wheel" "docker" "vboxusers"];
         packages = with pkgs; [
-            anydesk
             (wineWowPackages.full.override {
                 wineRelease = "staging";
                 mingwSupport = true;
@@ -194,13 +193,6 @@
     users.defaultUserShell = pkgs.zsh;
 
 
-# Install steam
-    programs.steam = {
-        enable = true;
-        remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-        dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-    };
-  
 # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
     nixpkgs.config.allowBroken = true;
@@ -236,9 +228,6 @@
         #vagrant
         docker-compose
         python3
-        jetbrains.gateway
-        jetbrains.clion
-        jetbrains-toolbox
         OVMFFull
 	clockify
 	nodejs_22
