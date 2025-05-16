@@ -9,6 +9,7 @@
         [ # Include the results of the hardware scan.
           ./hardware-configuration.nix
           ./nvidia.nix
+	  ./intellij-wrapper.nix
         ];
 
     nix.settings.experimental-features = [ "flakes" "nix-command" ];
@@ -52,13 +53,23 @@
   
 # Enable networking
     # networking.networkmanager.enable = true;
-    networking.extraHosts =
-        ''
-        127.0.0.1 pve
-        127.0.0.1 datomic
-        '';
-    systemd.services.NetworkManager-wait-online.enable = false;
+	networking.extraHosts =
+		''
+		127.0.0.1 pve
+		127.0.0.1 datomic
+		'';
+	systemd.services.NetworkManager-wait-online.enable = false;
 
+   # Set global environment variables
+	environment.variables = {
+		LD_LIBRARY_PATH = "${pkgs.libGL}/lib:${pkgs.libGLU}/lib:${pkgs.mesa.drivers}/lib:${pkgs.xorg.libX11}/lib:${pkgs.xorg.libXrender}/lib:${pkgs.xorg.libXext}/lib:${pkgs.xorg.libXtst}/lib:${pkgs.xorg.libXi}/lib";
+	};
+
+    # Set session variables for all users
+    environment.sessionVariables = {
+      JAVA_HOME = "${pkgs.temurin-jre-bin-17}";
+      _JAVA_OPTIONS = "-Djava.library.path=${pkgs.libGL}/lib:${pkgs.libGLU}/lib:${pkgs.mesa.drivers}/lib";
+    };
 
 # Set your time zone.
   time.timeZone = "Africa/Johannesburg";
@@ -68,7 +79,7 @@
 
 # Enable the X11 windowing system.
 	services.xserver.enable = true;
-
+	
 # Enable the GNOME Desktop Environment.
 	# use lightdm for x11vncserver
 	# still need to check if lightdm is 100% needed
@@ -159,6 +170,7 @@
         enable = true;
     };
 
+
 # Install 1pass
     programs._1password.enable = true;
     programs._1password-gui = {
@@ -212,7 +224,16 @@
         zsh
         anydesk
         slack
-        jetbrains.idea-community
+	
+	jetbrains.idea-ultimate
+	mesa
+	xorg.libX11
+	xorg.libXrender
+	xorg.libXext
+	xorg.libXtst
+	xorg.libXi
+	#jetbrains.idea-community
+
         gitui
         clojure-lsp
         clojure
@@ -237,6 +258,7 @@
 	maven
 	yarn
 	cider
+	#cider-2
 	torrential
 	vscode
 	ardour
@@ -248,15 +270,25 @@
 	gpu-viewer
 	inspector
 	code-cursor
-
+	postman
+	mariadb
+	postgresql
+	
+	
+	
 	# VNC server
 	x11vnc
 	
 	#AI tools
 	lmstudio
-
+	ollama
+	#nvidia-container-toolkit
+	#Install java
+	temurin-jre-bin-17
 	#lastapp
 	
+	#keylogger to see which keys I need for split keyboard
+	logkeys
 		
 
 #WINE
@@ -294,10 +326,19 @@
 		settings.PasswordAuthentication = false;
 	};
 	
-	#services.mysql = {
-	#	enable = true;
-	#	package = pkgs.mariadb;
-	#};
+	services.mysql = {
+		enable = true;
+		package = pkgs.mariadb;
+	};
+
+	services.postgresql = {
+              enable = false;
+              # Optional: specify database names
+              ensureDatabases = [ "mydatabase" ];
+              # Optional: configure authentication
+              # authentication = lib.mkOverride 10 '' #type database DBuser auth-method local all all trust ''
+              # example: allow all local connections without password
+            };
 	
   	system.stateVersion = "24.11"; # Did you read the comment?
 

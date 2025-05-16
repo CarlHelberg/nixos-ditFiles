@@ -5,12 +5,23 @@
 
 # Enable OpenGL
   hardware.opengl = {
-	  enable = true;
-	  # Load nvidia driver for Xorg and Wayland
+	enable = true;
+	# Load nvidia driver for Xorg and Wayland
+	
+	driSupport32Bit = true;
+	extraPackages = with pkgs; [
+		libGL
+		libGLU
+		mesa.drivers
+	];
+	extraPackages32 = with pkgs.pkgsi686Linux; [
+		libGL
+		libGLU
+	];
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [ "nvidiaLegacy470"];
+  services.xserver.videoDrivers = [ "nvidiaLegacy470" ];
 
   hardware.nvidia = {
 
