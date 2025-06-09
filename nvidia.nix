@@ -5,19 +5,20 @@
 
 # Enable OpenGL
   hardware.opengl = {
-	enable = true;
-	# Load nvidia driver for Xorg and Wayland
-	
-	driSupport32Bit = true;
-	extraPackages = with pkgs; [
+	  enable = true;
+	  # driSupport is now enabled by default, so we can remove this line
+	  # driSupport = true; 
+	  driSupport32Bit = true;
+	  extraPackages = with pkgs; [
 		libGL
 		libGLU
 		mesa.drivers
-	];
-	extraPackages32 = with pkgs.pkgsi686Linux; [
+	  ];
+	  extraPackages32 = with pkgs.pkgsi686Linux; [
 		libGL
 		libGLU
-	];
+	  ];
+	  # Load nvidia driver for Xorg and Wayland
   };
 
   # Load nvidia driver for Xorg and Wayland

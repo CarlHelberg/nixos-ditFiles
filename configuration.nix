@@ -1,6 +1,6 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# and in the NixOS manual (accessible by running 'nixos-help').
 
 { config, pkgs, ... }:
 
@@ -9,7 +9,7 @@
         [ # Include the results of the hardware scan.
           ./hardware-configuration.nix
           ./nvidia.nix
-	  ./intellij-wrapper.nix
+          ./skiko-fix.nix
         ];
 
     nix.settings.experimental-features = [ "flakes" "nix-command" ];
@@ -53,21 +53,21 @@
   
 # Enable networking
     # networking.networkmanager.enable = true;
-	networking.extraHosts =
-		''
-		127.0.0.1 pve
-		127.0.0.1 datomic
-		'';
-	systemd.services.NetworkManager-wait-online.enable = false;
+    networking.extraHosts =
+        ''
+        127.0.0.1 pve
+        127.0.0.1 datomic
+        '';
+    systemd.services.NetworkManager-wait-online.enable = false;
 
-   # Set global environment variables
-	environment.variables = {
-		LD_LIBRARY_PATH = "${pkgs.libGL}/lib:${pkgs.libGLU}/lib:${pkgs.mesa.drivers}/lib:${pkgs.xorg.libX11}/lib:${pkgs.xorg.libXrender}/lib:${pkgs.xorg.libXext}/lib:${pkgs.xorg.libXtst}/lib:${pkgs.xorg.libXi}/lib";
-	};
+    # Set global environment variables
+    environment.variables = {
+      LD_LIBRARY_PATH = "${pkgs.libGL}/lib:${pkgs.libGLU}/lib:${pkgs.mesa.drivers}/lib:${pkgs.xorg.libX11}/lib:${pkgs.xorg.libXrender}/lib:${pkgs.xorg.libXext}/lib:${pkgs.xorg.libXtst}/lib:${pkgs.xorg.libXi}/lib";
+    };
 
     # Set session variables for all users
     environment.sessionVariables = {
-      JAVA_HOME = "${pkgs.temurin-jre-bin-17}";
+      JAVA_HOME = "${pkgs.temurin-jre-bin-17}/lib/openjdk";
       _JAVA_OPTIONS = "-Djava.library.path=${pkgs.libGL}/lib:${pkgs.libGLU}/lib:${pkgs.mesa.drivers}/lib";
     };
 
@@ -146,7 +146,7 @@
 # Enable touchpad support (enabled default in most desktopManager).
     # services.xserver.libinput.enable = true;
 
-# Define a user account. Don't forget to set a password with ‘passwd’.
+# Define a user account. Don't forget to set a password with 'passwd'.
     users.users.carl = {
         isNormalUser = true;
         description = "Carl";
@@ -170,7 +170,7 @@
         enable = true;
     };
 
-
+	
 # Install 1pass
     programs._1password.enable = true;
     programs._1password-gui = {
@@ -224,16 +224,13 @@
         zsh
         anydesk
         slack
-	
-	jetbrains.idea-ultimate
-	mesa
-	xorg.libX11
-	xorg.libXrender
-	xorg.libXext
-	xorg.libXtst
-	xorg.libXi
-	#jetbrains.idea-community
-
+        mesa
+        xorg.libX11
+        xorg.libXrender
+        xorg.libXext
+        xorg.libXtst
+        xorg.libXi
+        
         gitui
         clojure-lsp
         clojure
@@ -243,37 +240,37 @@
         gnomeExtensions.notification-timeout
         gnomeExtensions.system-monitor
         gnomeExtensions.notification-banner-reloaded
-	dconf
+        dconf
         home-manager
         packer
         #vagrant
         docker-compose
         python3
         OVMFFull
-	clockify
-	nodejs_22
-	insomnia
-	rustc
-	cargo
-	maven
-	yarn
-	cider
-	#cider-2
-	torrential
-	vscode
-	ardour
-	busybox
-	gnome-remote-desktop
-	xorg.xinit
-	ruby
-	jq
-	gpu-viewer
-	inspector
-	code-cursor
-	postman
-	mariadb
-	postgresql
-	
+        clockify
+        nodejs_22
+        insomnia
+        rustc
+        cargo
+        maven
+        yarn
+        cider
+        #cider-2
+        torrential
+        vscode
+        ardour
+        busybox
+        gnome-remote-desktop
+        xorg.xinit
+        ruby
+        jq
+        gpu-viewer
+        inspector
+        code-cursor
+        postman
+        mariadb
+        postgresql
+	jetbrains.idea-community
 	
 	
 	# VNC server
@@ -287,6 +284,7 @@
 	temurin-jre-bin-17
 	#lastapp
 	
+
 	#keylogger to see which keys I need for split keyboard
 	logkeys
 		
@@ -331,6 +329,8 @@
 		package = pkgs.mariadb;
 	};
 
+	services.flatpak.enable = true;
+
 	services.postgresql = {
               enable = false;
               # Optional: specify database names
@@ -342,5 +342,15 @@
 	
   	system.stateVersion = "24.11"; # Did you read the comment?
 
-
+  # Create symlinks for libGL.so.1 in common library paths
+  system.activationScripts.libGL = {
+    deps = [];
+    text = ''
+      mkdir -p /usr/lib
+      ln -sf ${pkgs.libGL}/lib/libGL.so.1 /usr/lib/libGL.so.1
+      ln -sf ${pkgs.libGL}/lib/libGL.so.1 /usr/lib/libGL.so
+      ln -sf ${pkgs.libGLU}/lib/libGLU.so.1 /usr/lib/libGLU.so.1
+      ln -sf ${pkgs.libGLU}/lib/libGLU.so.1 /usr/lib/libGLU.so
+    '';
+  };
 }
